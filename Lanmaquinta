@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Maquinita Online</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .login-box, .slot-box, .admin-panel {
+      background: #222;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>La Maquinita Online</h1>
+  <div class="login-box" id="login-box">
+    <h2>Iniciar Sesión</h2>
+    <input type="text" id="username" placeholder="Usuario"><br>
+    <input type="password" id="password" placeholder="Contraseña"><br>
+    <button onclick="login()">Entrar</button>
+    <p id="login-msg"></p>
+  </div>
+
+  <div class="slot-box hidden" id="slot-box">
+    <h2>¡Bienvenido, <span id="user-name"></span>!</h2>
+    <p>Saldo: <span id="user-balance">0</span> monedas</p>
+    <button onclick="playSlot()">Jugar</button>
+    <p id="slot-result"></p>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="admin-panel hidden" id="admin-panel">
+    <h2>Panel de Cajero</h2>
+    <table border="1" style="width:100%; background:#333;">
+      <thead>
+        <tr><th>Usuario</th><th>Saldo</th><th>+</th><th>-</th></tr>
+      </thead>
+      <tbody id="user-table"></tbody>
+    </table>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <script>
+    const users = {
+      admin: { password: 'maquinita123', role: 'admin' },
+      jugador1: { password: '1234', balance: 100 },
+      jugador2: { password: '1234', balance: 100 },
+      jugador3: { password: '1234', balance: 100 },
+      jugador4: { password: '1234', balance: 100 },
+      jugador5: { password: '1234', balance: 100 },
+      jugador6: { password: '1234', balance: 100 },
+      jugador7: { password: '1234', balance: 100 },
+      jugador8: { password: '1234', balance: 100 },
+      jugador9: { password: '1234', balance: 100 },
+      jugador10: { password: '1234', balance: 100 }
+    };
+
+    let currentUser = null;
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const user = users[username];
+      if (!user || user.password !== password) {
+        document.getElementById('login-msg').innerText = 'Credenciales incorrectas';
+        return;
+      }
+      currentUser = username;
+      document.getElementById('login-box').classList.add('hidden');
+      if (user.role === 'admin') {
+        showAdminPanel();
+      } else {
+        showSlotBox();
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('slot-box').classList.add('hidden');
+      document.getElementById('admin-panel').classList.add('hidden');
+      document.getElementById('login-box').classList.remove('hidden');
+    }
+
+    function showSlotBox() {
+      document.getElementById('slot-box').classList.remove('hidden');
+      document.getElementById('user-name').innerText = currentUser;
+      document.getElementById('user-balance').innerText = users[currentUser].balance;
+    }
+
+    function playSlot() {
+      const result = Math.random();
+      let win = 0;
+      if (result < 0.3) win = 10;
+      else if (result < 0.5) win = 5;
+      else win = -5;
+      users[currentUser].balance += win;
+      document.getElementById('user-balance').innerText = users[currentUser].balance;
+      document.getElementById('slot-result').innerText = win > 0 ? `¡Ganaste ${win} monedas!` : `Perdiste ${-win} monedas.`;
+    }
+
+    function showAdminPanel() {
+      document.getElementById('admin-panel').classList.remove('hidden');
+      const tbody = document.getElementById('user-table');
+      tbody.innerHTML = '';
+      for (const user in users) {
+        if (user === 'admin') continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${user}</td>
+          <td id="bal-${user}">${users[user].balance}</td>
+          <td><button onclick="adjustBalance('${user}', 10)">+10</button></td>
+          <td><button onclick="adjustBalance('${user}', -10)">-10</button></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function adjustBalance(user, amount) {
+      users[user].balance += amount;
+      document.getElementById(`bal-${user}`).innerText = users[user].balance;
+    }
+  </script>
+</body>
+</html>
